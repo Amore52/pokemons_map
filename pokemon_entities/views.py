@@ -36,9 +36,9 @@ def get_pokemon_image_url(pokemon, request):
 
 def show_all_pokemons(request):
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    now = timezone.localtime()
-    active_entities = PokemonEntity.objects.filter(appeared_at__lte=now,
-                                                   disappeared_at__gte=now).select_related('pokemon')
+    time_now = timezone.localtime()
+    active_entities = PokemonEntity.objects.filter(appeared_at__lte=time_now,
+                                                   disappeared_at__gte=time_now).select_related('pokemon')
     for pokemon_entity in active_entities:
         add_pokemon(
             folium_map, pokemon_entity.lat,
@@ -78,9 +78,9 @@ def show_pokemon(request, pokemon_id):
             'img_url': get_pokemon_image_url(evolved_from, request),
         }
 
-    evolutions = pokemon.evolutions.all()
-    if evolutions.exists():
-        next_evolution = evolutions.first()
+
+    if pokemon.evolutions_to.first():
+        next_evolution = pokemon.evolutions_to.first()
         pokemons_on_page['next_evolution'] = {
             'pokemon_id': next_evolution.id,
             'title_ru': next_evolution.title,
@@ -89,10 +89,10 @@ def show_pokemon(request, pokemon_id):
 
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-
+    time_now = timezone.localtime()
     for entity in pokemon.entities.filter(
-            appeared_at__lte=timezone.localtime(),
-            disappeared_at__gte=timezone.localtime()):
+            appeared_at__lte=time_now,
+            disappeared_at__gte=time_now):
         add_pokemon(
             folium_map,
             entity.lat,
